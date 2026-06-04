@@ -1,0 +1,7 @@
+id,type,amount,description,day,dateNum,month,category
+1,income,5000,Sueldo Semanal,Lunes,1,Junio,Sueldo
+2,expense,450,Supermercado,Martes,2,Junio,Comida
+3,expense,120,Ubers,Miércoles,3,Junio,Transporte
+4,income,1500,Freelance web,Jueves,10,Junio,Freelance
+5,expense,600,Cena con amigos,Viernes,18,Junio,Ocio
+6,expense,950,Reparación auto,Sábado,25,Junio,Otros Gastos

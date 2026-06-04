@@ -1,0 +1,52 @@
+/* PLAN DE ACCIÓN:
+   1. Ajustar el color de fondo general de la aplicación en el body para que sea un gris claro minimalista (`bg-slate-50`).
+   2. Ajustar los colores y opacidades de las barras de scroll personalizadas para encajar con el tema claro.
+   3. Modificar la definición de las clases `glass` y `glass-accent` para que utilicen un fondo claro translúcido con desenfoque de fondo y bordes grisáceos sumamente sutiles.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    -webkit-tap-highlight-color: transparent;
+    @apply bg-slate-50 text-slate-800;
+  }
+}
+
+/* Custom scrollbars for transaction history (Light Theme) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Glassmorphism utility classes (Light Theme) */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(241, 245, 249, 0.8);
+}
+
+.glass-accent {
+  background: rgba(248, 250, 252, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Active touch state for mobile buttons */
+.btn-active:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
