@@ -81,7 +81,6 @@ export default function LoginScreen({ onLogin }) {
             </label>
             <input
               type="password"
-              inputMode="numeric"
               placeholder="Digite PIN"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
@@ -110,11 +109,6 @@ export default function LoginScreen({ onLogin }) {
             Ingresar
           </button>
         </form>
-
-        {/* Pistas rápidas de acceso en desarrollo (demo) */}
-        <div className="mt-8 pt-4 border-t border-slate-100 w-full text-center">
-          <span className="text-[10px] text-slate-400">PINs Demo: User: <code className="bg-slate-100 px-1 py-0.5 rounded">user123</code> | Admin: <code className="bg-slate-100 px-1 py-0.5 rounded">admin123</code></span>
-        </div>
       </div>
     </div>
   );
