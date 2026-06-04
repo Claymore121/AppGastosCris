@@ -5,51 +5,29 @@
    4. De esta manera, el análisis mensual agrupado por semanas se adaptará dinámicamente al usuario que el administrador seleccione para auditar (Usuario Principal, Demo o Todos).
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LogOut, ShieldAlert, Users, TrendingUp, TrendingDown, Search, Trash2 } from 'lucide-react';
 import MonthlyWeeklySummary from './MonthlyWeeklySummary';
 
 export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLogout }) {
   const [selectedUser, setSelectedUser] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Transacciones demo del sistema para que el administrador audite múltiples usuarios
-  const [demoTransactions, setDemoTransactions] = useState([
-    { id: 'demo1', type: 'income', amount: 3500, description: 'Freelance Design', day: 'Martes', dateNum: '12', month: 'Junio', category: 'Freelance', user: 'demo_user' },
-    { id: 'demo2', type: 'expense', amount: 800, description: 'Alquiler oficina', day: 'Miércoles', dateNum: '13', month: 'Junio', category: 'Hogar', user: 'demo_user' },
-    { id: 'demo3', type: 'expense', amount: 150, description: 'Licencia Software', day: 'Viernes', dateNum: '15', month: 'Junio', category: 'Suscripciones', user: 'demo_user' },
-    { id: 'demo4', type: 'income', amount: 2000, description: 'Bono Trimestral', day: 'Jueves', dateNum: '3', month: 'Junio', category: 'Sueldo', user: 'demo_user' },
-    { id: 'demo5', type: 'expense', amount: 400, description: 'Seguro médico', day: 'Lunes', dateNum: '22', month: 'Junio', category: 'Salud', user: 'demo_user' },
-  ]);
 
-  // Mezclar transacciones reales (marcando el usuario 'main_user') y de demo
-  const [allTransactions, setAllTransactions] = useState([]);
-
-  useEffect(() => {
-    const formattedReal = realTransactions.map(t => ({ ...t, user: 'main_user' }));
-    setAllTransactions([...formattedReal, ...demoTransactions]);
-  }, [realTransactions, demoTransactions]);
+  const allTransactions = realTransactions.map(t => ({ ...t, user: 'main_user' }));
 
   const handleDelete = (tx) => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar esta transacción de ${tx.user === 'main_user' ? 'Usuario Principal' : 'Usuario Demo'}?`)) {
-      if (tx.user === 'main_user') {
-        onDeleteRealTx(tx.id);
-      } else {
-        setDemoTransactions(prev => prev.filter(t => t.id !== tx.id));
-      }
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
+      onDeleteRealTx(tx.id);
     }
   };
 
-  // Filtrado de transacciones por usuario (antes de la búsqueda de texto, útil para métricas semanales y mensuales)
-  const userFilteredTxs = allTransactions.filter(tx => selectedUser === 'all' || tx.user === selectedUser);
+  const userFilteredTxs = selectedUser === 'all' ? allTransactions : allTransactions.filter(tx => tx.user === selectedUser);
 
-  // Filtrado final de transacciones para la lista auditable (con búsqueda de texto)
   const filteredTxs = userFilteredTxs.filter(tx => {
     return tx.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
            tx.category.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // Cálculos Consolidados
   const totalIncome = allTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -131,11 +109,10 @@ export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLog
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Auditar por Usuario
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'all', label: 'Todos' },
                   { id: 'main_user', label: 'Principal' },
-                  { id: 'demo_user', label: 'Demo' }
                 ].map(usr => (
                   <button
                     key={usr.id}
@@ -184,12 +161,8 @@ export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLog
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm font-bold text-slate-700">{tx.description}</span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                          tx.user === 'main_user' 
-                            ? 'bg-teal-50 text-teal-600 border border-teal-100' 
-                            : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
-                        }`}>
-                          {tx.user === 'main_user' ? 'Principal' : 'Demo'}
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase bg-teal-50 text-teal-600 border border-teal-100">
+                          Principal
                         </span>
                       </div>
                       
