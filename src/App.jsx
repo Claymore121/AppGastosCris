@@ -6,7 +6,7 @@
 */
 
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, MinusCircle, Wallet, ArrowUpRight, ArrowDownRight, Calendar, RefreshCw, LogOut } from 'lucide-react';
+import { PlusCircle, MinusCircle, Wallet, ArrowUpRight, ArrowDownRight, Calendar, LogOut } from 'lucide-react';
 import WeeklyChart from './components/WeeklyChart';
 import AddTransactionModal from './components/AddTransactionModal';
 import TransactionHistory from './components/TransactionHistory';
@@ -25,6 +25,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState('expense');
+  const [editTx, setEditTx] = useState(null);
 
   // Cargar transacciones desde Supabase
   useEffect(() => {
@@ -107,20 +108,42 @@ export default function App() {
     }
   };
 
-  const handleResetWeek = async () => {
-    if (window.confirm('¿Estás seguro de que deseas reiniciar la semana? Se borrarán todos los datos en Supabase.')) {
-      try {
-        const { error } = await supabase
-          .from('transactions')
-          .delete()
-          .neq('id', 0); // Borra todos los registros
+  const handleOpenEdit = (tx) => {
+    setEditTx(tx);
+    setModalType(tx.type);
+    setModalOpen(true);
+  };
 
-        if (error) throw error;
-        setTransactions([]);
-      } catch (err) {
-        console.error('[DATABASE RESET ERROR]: Falló al reiniciar la semana en Supabase:', err);
-        alert('Error al borrar los datos de Supabase.');
+  const handleUpdateTransaction = async (updatedTx) => {
+    try {
+      const { id, ...txData } = updatedTx;
+      const oldTx = editTx;
+      const { data, error } = await supabase
+        .from('transactions')
+        .update(txData)
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+
+      const { error: logError } = await supabase
+        .from('edit_history')
+        .insert([{
+          transaction_id: id,
+          old_data: oldTx,
+          new_data: updatedTx,
+        }]);
+
+      if (logError) console.error('[AUDIT LOG ERROR]:', logError);
+
+      if (data && data.length > 0) {
+        setTransactions(prev => prev.map(t => t.id === id ? data[0] : t));
       }
+      setEditTx(null);
+      setModalOpen(false);
+    } catch (err) {
+      console.error('[DATABASE UPDATE ERROR]: Falló al actualizar en Supabase:', err);
+      alert('Error al actualizar la transacción.');
     }
   };
 
@@ -157,13 +180,6 @@ export default function App() {
             <p className="text-xs text-slate-400">Control de gastos e ingresos</p>
           </div>
           <div className="flex gap-2">
-            <button 
-              onClick={handleResetWeek}
-              className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 text-slate-500 transition-all btn-active"
-              title="Reiniciar Semana"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
             <button 
               onClick={handleLogout}
               className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 text-slate-500 hover:text-rose-500 transition-all btn-active"
@@ -225,14 +241,14 @@ export default function App() {
           {/* SECCIÓN 3: Botones de Acción (Debajo del balance) */}
           <section className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => { setModalType('income'); setModalOpen(true); }}
+              onClick={() => { setModalType('income'); setEditTx(null); setModalOpen(true); }}
               className="py-3.5 px-4 bg-teal-500 hover:bg-teal-400 active:scale-95 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all btn-active"
             >
               <PlusCircle className="w-5 h-5" />
               <span>Ingreso</span>
             </button>
             <button
-              onClick={() => { setModalType('expense'); setModalOpen(true); }}
+              onClick={() => { setModalType('expense'); setEditTx(null); setModalOpen(true); }}
               className="py-3.5 px-4 bg-rose-500 hover:bg-rose-400 active:scale-95 text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20 transition-all btn-active"
             >
               <MinusCircle className="w-5 h-5" />
@@ -249,7 +265,7 @@ export default function App() {
             <div className="flex-1 bg-slate-50/50 rounded-3xl border border-slate-100 overflow-hidden shadow-inner">
               <TransactionHistory 
                 transactions={transactions} 
-                onDelete={handleDeleteTransaction} 
+                onEdit={handleOpenEdit} 
               />
             </div>
           </section>
@@ -262,8 +278,10 @@ export default function App() {
       {/* Modal Deslizable */}
       <AddTransactionModal 
         isOpen={modalOpen} 
-        onClose={() => setModalOpen(false)} 
+        onClose={() => { setModalOpen(false); setEditTx(null); }} 
         onAdd={handleAddTransaction} 
+        onUpdate={handleUpdateTransaction}
+        editTx={editTx}
         type={modalType} 
       />
     </div>

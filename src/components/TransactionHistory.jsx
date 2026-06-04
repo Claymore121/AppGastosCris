@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { 
-  Trash2, 
+  Pencil, 
   Utensils, 
   Car, 
   Gamepad2, 
@@ -48,7 +48,7 @@ const getCategoryIcon = (category) => {
   }
 };
 
-export default function TransactionHistory({ transactions, onDelete }) {
+export default function TransactionHistory({ transactions, onEdit }) {
   const [activeFilter, setActiveFilter] = useState('all');
 
   const filteredTransactions = transactions.filter(t => {
@@ -110,7 +110,7 @@ export default function TransactionHistory({ transactions, onDelete }) {
                 </div>
               </div>
 
-              {/* Monto + Eliminar */}
+              {/* Monto + Editar */}
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <span className={`text-sm font-extrabold ${
@@ -120,11 +120,11 @@ export default function TransactionHistory({ transactions, onDelete }) {
                   </span>
                 </div>
                 <button
-                  onClick={() => onDelete(tx.id)}
-                  className="p-2 rounded-lg bg-transparent text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border hover:border-rose-100 active:scale-95 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
-                  title="Eliminar registro"
+                  onClick={() => onEdit(tx)}
+                  className="p-2 rounded-lg bg-transparent text-slate-400 hover:text-teal-500 hover:bg-teal-50 hover:border hover:border-teal-100 active:scale-95 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
+                  title="Editar registro"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Pencil className="w-4 h-4" />
                 </button>
               </div>
             </div>

@@ -19,7 +19,7 @@ const CATEGORIES = {
   expense: ['Comida', 'Transporte', 'Ocio', 'Salud', 'Hogar', 'Suscripciones', 'Otros Gastos']
 };
 
-export default function AddTransactionModal({ isOpen, onClose, onAdd, type }) {
+export default function AddTransactionModal({ isOpen, onClose, onAdd, onUpdate, editTx, type }) {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [day, setDay] = useState('Lunes');
@@ -27,31 +27,30 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd, type }) {
   const [month, setMonth] = useState('Enero');
   const [category, setCategory] = useState('');
 
-  // Sincronizar categorías por defecto
-  useEffect(() => {
-    if (type) {
-      setCategory(CATEGORIES[type][0]);
-    }
-  }, [type, isOpen]);
-
-  // Autodetectar fecha actual del presente año
+  // Pre-rellenar si es edición, o auto-detectar fecha si es nuevo
   useEffect(() => {
     if (isOpen) {
-      const today = new Date();
-      
-      // Día de la semana (Lunes a Domingo)
-      const dayIndex = today.getDay(); // 0: Domingo, 1: Lunes...
-      const daysTranslation = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-      setDay(daysTranslation[dayIndex]);
-      
-      // Número de día (1-31)
-      setDateNum(today.getDate().toString());
-      
-      // Mes
-      const monthIndex = today.getMonth(); // 0: Enero...
-      setMonth(MONTHS[monthIndex]);
+      if (editTx) {
+        setAmount(editTx.amount.toString());
+        setDescription(editTx.description);
+        setDay(editTx.day);
+        setDateNum(editTx.dateNum?.toString() || '1');
+        setMonth(editTx.month);
+        setCategory(editTx.category);
+      } else {
+        setAmount('');
+        setDescription('');
+        const today = new Date();
+        const dayIndex = today.getDay();
+        const daysTranslation = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        setDay(daysTranslation[dayIndex]);
+        setDateNum(today.getDate().toString());
+        const monthIndex = today.getMonth();
+        setMonth(MONTHS[monthIndex]);
+        setCategory(CATEGORIES[type][0]);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editTx]);
 
   if (!isOpen) return null;
 
@@ -62,22 +61,33 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd, type }) {
       return;
     }
 
-    const newTx = {
-      id: Date.now().toString(),
-      type,
-      amount: parseFloat(amount),
-      description: description.trim(),
-      day,
-      dateNum,
-      month,
-      category,
-    };
-
-    onAdd(newTx);
-    
-    // Resetear form
-    setAmount('');
-    setDescription('');
+    if (editTx) {
+      const updatedTx = {
+        ...editTx,
+        type,
+        amount: parseFloat(amount),
+        description: description.trim(),
+        day,
+        dateNum,
+        month,
+        category,
+      };
+      onUpdate(updatedTx);
+    } else {
+      const newTx = {
+        id: Date.now().toString(),
+        type,
+        amount: parseFloat(amount),
+        description: description.trim(),
+        day,
+        dateNum,
+        month,
+        category,
+      };
+      onAdd(newTx);
+      setAmount('');
+      setDescription('');
+    }
   };
 
   return (
@@ -94,7 +104,7 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd, type }) {
         <div className="px-6 pb-2 flex justify-between items-center">
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
             <span className={`w-3.5 h-3.5 rounded-full ${type === 'income' ? 'bg-teal-500' : 'bg-rose-500'}`} />
-            Nuevo {type === 'income' ? 'Ingreso' : 'Gasto'}
+            {editTx ? 'Editar' : 'Nuevo'} {type === 'income' ? 'Ingreso' : 'Gasto'}
           </h3>
           <button 
             onClick={onClose}
@@ -244,7 +254,7 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd, type }) {
                 : 'bg-rose-500 hover:bg-rose-400 shadow-rose-500/20'
             }`}
           >
-            Guardar {type === 'income' ? 'Ingreso' : 'Gasto'}
+            {editTx ? 'Actualizar' : 'Guardar'} {type === 'income' ? 'Ingreso' : 'Gasto'}
           </button>
         </form>
       </div>

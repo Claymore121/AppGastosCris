@@ -5,13 +5,26 @@
    4. De esta manera, el análisis mensual agrupado por semanas se adaptará dinámicamente al usuario que el administrador seleccione para auditar (Usuario Principal, Demo o Todos).
 */
 
-import React, { useState } from 'react';
-import { LogOut, ShieldAlert, Users, TrendingUp, TrendingDown, Search, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LogOut, ShieldAlert, Users, TrendingUp, TrendingDown, Search, Trash2, Clock } from 'lucide-react';
 import MonthlyWeeklySummary from './MonthlyWeeklySummary';
+import { supabase } from '../supabaseClient';
 
 export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLogout }) {
   const [selectedUser, setSelectedUser] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [editHistory, setEditHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchEditHistory = async () => {
+      const { data } = await supabase
+        .from('edit_history')
+        .select('*')
+        .order('id', { ascending: false });
+      setEditHistory(data || []);
+    };
+    fetchEditHistory();
+  }, []);
 
   const allTransactions = realTransactions.map(t => ({ ...t, user: 'main_user' }));
 
@@ -200,6 +213,43 @@ export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLog
               )}
             </div>
           </section>
+
+          {/* Historial de Ediciones */}
+          {editHistory.length > 0 && (
+            <section className="border border-slate-100 rounded-2xl p-4 shadow-sm">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                Historial de Ediciones
+              </h3>
+              <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                {editHistory.map(entry => {
+                  const oldData = entry.old_data || {};
+                  const newData = entry.new_data || {};
+                  const changedFields = Object.keys(newData).filter(k => 
+                    k !== 'id' && JSON.stringify(oldData[k]) !== JSON.stringify(newData[k])
+                  );
+                  return (
+                    <div key={entry.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px] font-bold text-indigo-600">Transacción #{entry.transaction_id}</span>
+                        <span className="text-[9px] text-slate-400">{new Date(entry.edited_at).toLocaleString('es-ES')}</span>
+                      </div>
+                      {changedFields.map(field => (
+                        <div key={field} className="text-[10px] text-slate-500 leading-relaxed">
+                          <span className="font-semibold text-slate-600">{field}:</span>{' '}
+                          <span className="line-through text-rose-400">{oldData[field]}</span>{' '}
+                          <span className="text-teal-500">→ {newData[field]}</span>
+                        </div>
+                      ))}
+                      {changedFields.length === 0 && (
+                        <p className="text-[10px] text-slate-400 italic">Sin cambios detectados</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </main>
       </div>
     </div>
