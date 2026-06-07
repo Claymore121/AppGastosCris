@@ -15,7 +15,7 @@ const MONTHS = [
 ];
 
 const CATEGORIES = {
-  income: ['Sueldo', 'Freelance', 'Regalo', 'Inversiones', 'Otros Ingresos'],
+  income: ['Sueldo', 'Freelance', 'Regalo', 'Inversiones', 'Otros Ingresos', 'Casa' , 'Mama', 'Gasto Personal'],
   expense: ['Comida', 'Transporte', 'Ocio', 'Salud', 'Hogar', 'Suscripciones', 'Otros Gastos']
 };
 
@@ -231,13 +231,17 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd, onUpdate, 
                   key={cat}
                   type="button"
                   onClick={() => setCategory(cat)}
-                  className={`px-4 py-2 text-xs font-bold rounded-full border transition-all btn-active ${
-                    category === cat
-                      ? type === 'income'
-                        ? 'bg-teal-50 border-teal-200 text-teal-600 shadow-sm'
-                        : 'bg-rose-50 border-rose-200 text-rose-600 shadow-sm'
-                      : 'bg-slate-50/50 border-slate-200 text-slate-500 hover:border-slate-300'
-                  }`}
+                    className={`px-4 py-2 text-xs font-bold rounded-full border transition-all btn-active ${
+                      category === cat
+                        ? type === 'income'
+                          ? 'bg-teal-50 border-teal-200 text-teal-600 shadow-sm'
+                          : 'bg-rose-50 border-rose-200 text-rose-600 shadow-sm'
+                        : `bg-slate-50/50 border-slate-200 hover:border-slate-300 ${
+                            cat === 'Casa' ? 'text-emerald-600' :
+                            cat === 'Gasto Personal' ? 'text-orange-500' :
+                            'text-slate-500'
+                          }`
+                    }`}
                 >
                   {cat}
                 </button>

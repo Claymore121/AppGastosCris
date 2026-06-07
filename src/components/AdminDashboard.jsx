@@ -185,7 +185,11 @@ export default function AdminDashboard({ realTransactions, onDeleteRealTx, onLog
                           <span>{tx.dateNum} de {tx.month || 'Mes'}</span>
                         )}
                         <span>•</span>
-                        <span>{tx.category}</span>
+                        <span className={
+                          tx.category === 'Casa' ? 'text-emerald-600 font-semibold' :
+                          tx.category === 'Gasto Personal' ? 'text-orange-500 font-semibold' :
+                          ''
+                        }>{tx.category}</span>
                       </div>
                     </div>
 

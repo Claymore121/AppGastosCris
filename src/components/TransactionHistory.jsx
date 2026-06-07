@@ -18,7 +18,9 @@ import {
   Tv,
   Coins,
   Sparkles,
-  Gift
+  Gift,
+  Building2,
+  User
 } from 'lucide-react';
 
 const getCategoryIcon = (category) => {
@@ -43,6 +45,10 @@ const getCategoryIcon = (category) => {
       return <Gift className="w-4 h-4 text-pink-500" />;
     case 'Inversiones':
       return <Coins className="w-4 h-4 text-yellow-500" />;
+    case 'Casa':
+      return <Building2 className="w-4 h-4 text-emerald-600" />;
+    case 'Gasto Personal':
+      return <User className="w-4 h-4 text-orange-500" />;
     default:
       return <HelpCircle className="w-4 h-4 text-slate-500" />;
   }
@@ -105,7 +111,11 @@ export default function TransactionHistory({ transactions, onEdit }) {
                       </>
                     )}
                     <span>•</span>
-                    <span>{tx.category}</span>
+                    <span className={
+                      tx.category === 'Casa' ? 'text-emerald-600' :
+                      tx.category === 'Gasto Personal' ? 'text-orange-500' :
+                      'text-slate-400'
+                    }>{tx.category}</span>
                   </div>
                 </div>
               </div>
