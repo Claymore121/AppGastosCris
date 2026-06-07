@@ -111,11 +111,11 @@ export default function TransactionHistory({ transactions, onEdit }) {
                       </>
                     )}
                     <span>•</span>
-                    <span className={
-                      tx.category === 'Casa' ? 'text-emerald-600' :
-                      tx.category === 'Gasto Personal' ? 'text-orange-500' :
-                      'text-slate-400'
-                    }>{tx.category}</span>
+                    <span className={`px-1.5 py-0.5 rounded font-semibold ${
+                      tx.category === 'Casa' ? 'bg-emerald-50 text-emerald-600' :
+                      tx.category === 'Gasto Personal' ? 'bg-orange-50 text-orange-500' :
+                      'bg-slate-100 text-slate-500'
+                    }`}>{tx.category}</span>
                   </div>
                 </div>
               </div>
